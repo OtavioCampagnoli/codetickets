@@ -59,6 +59,7 @@ public class ImportacaoConfiguration {
         .build();
   }
 
+  @Bean
   public ItemWriter<Importacao> writer(DataSource dataSource) {
     String sql = "INSERT INTO importacao(id, cliente, cpf, data, evento, hora_importacao, nascimento, tipo_igresso) +" +
         "VALUES(:id, :cliente, :cpf, data:, :evento, " + LocalDate.now() + ", :nascimento, :tipoIgresso)";
