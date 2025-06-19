@@ -1,5 +1,9 @@
 package br.com.alura.codetickets;
 
+import java.time.LocalDate;
+
+import javax.sql.DataSource;
+
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -8,6 +12,8 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
+import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -50,6 +56,16 @@ public class ImportacaoConfiguration {
         .delimited()
         .names("cpf", "cliente", "nascimento", "evento", "data", "tipoIngresso", "horaImportacao")
         .targetType(Importacao.class)
+        .build();
+  }
+
+  public ItemWriter<Importacao> writer(DataSource dataSource) {
+    String sql = "INSERT INTO importacao(id, cliente, cpf, data, evento, hora_importacao, nascimento, tipo_igresso) +" +
+        "VALUES(:id, :cliente, :cpf, data:, :evento, " + LocalDate.now() + ", :nascimento, :tipoIgresso)";
+    return new JdbcBatchItemWriterBuilder<Importacao>()
+        .dataSource(dataSource)
+        .sql(sql)
+        .itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>())
         .build();
   }
 }
