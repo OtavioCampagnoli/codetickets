@@ -10,8 +10,8 @@ import java.time.format.DateTimeFormatter;
 
 public class importacaoMapper implements FieldSetMapper<Importacao> {
 
-    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Override
     public Importacao mapFieldSet(FieldSet fieldSet) throws BindException {

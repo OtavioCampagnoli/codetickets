@@ -54,15 +54,15 @@ public class ImportacaoConfiguration {
                 .comments("--")
                 .delimited()
                 .delimiter(";")
-                .names("cpf", "cliente", "nascimento", "evento", "data", "tipoIngresso", "horaImportacao")
-                .targetType(Importacao.class)
+                .names("cpf", "cliente", "nascimento", "evento", "data", "tipoIngresso", "valor")
+                .fieldSetMapper(new importacaoMapper())
                 .build();
     }
 
     @Bean
     public ItemWriter<Importacao> writer(DataSource dataSource) {
-        String sql = "INSERT INTO importacao(id, cliente, cpf, data, evento, hora_importacao, nascimento, tipo_igresso) +" +
-                "VALUES(:id, :cliente, :cpf, data:, :evento, " + LocalDate.now() + ", :nascimento, :tipoIgresso)";
+        String sql = "INSERT INTO importacao(cliente, cpf, data, evento, hora_importacao, valor, nascimento, tipo_igresso) " +
+                "VALUES(:cliente, :cpf, :data, :evento, :horaImportacao, :valor, :nascimento, :tipoIgresso)";
         return new JdbcBatchItemWriterBuilder<Importacao>()
                 .dataSource(dataSource)
                 .sql(sql)
