@@ -25,5 +25,6 @@ public class Importacao {
     private LocalDate data;
     private String tipoIgresso;
     private Double valor;
+    private Double taxaAdministrativa;
     private LocalDateTime horaImportacao;
 }
