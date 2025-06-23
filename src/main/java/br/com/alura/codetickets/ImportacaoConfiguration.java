@@ -1,9 +1,5 @@
 package br.com.alura.codetickets;
 
-import java.time.LocalDate;
-
-import javax.sql.DataSource;
-
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -20,53 +16,57 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import javax.sql.DataSource;
+import java.time.LocalDate;
+
 @Configuration
 public class ImportacaoConfiguration {
 
-  private final PlatformTransactionManager transationsManager;
+    private final PlatformTransactionManager transationsManager;
 
-  public ImportacaoConfiguration(PlatformTransactionManager transationsManager) {
-    this.transationsManager = transationsManager;
-  }
+    public ImportacaoConfiguration(PlatformTransactionManager transationsManager) {
+        this.transationsManager = transationsManager;
+    }
 
-  @Bean
-  public Job job(Step primeiroPasso, JobRepository jobRepository) {
-    return new JobBuilder("geracao-tickets", jobRepository)
-        .start(primeiroPasso)
-        .incrementer(new RunIdIncrementer())
-        .build();
-  }
+    @Bean
+    public Job job(Step primeiroPasso, JobRepository jobRepository) {
+        return new JobBuilder("geracao-tickets", jobRepository)
+                .start(primeiroPasso)
+                .incrementer(new RunIdIncrementer())
+                .build();
+    }
 
-  @Bean
-  public Step passoInicial(JobRepository jobRepository, ItemReader<Importacao> reader,
-      ItemWriter<Importacao> writer) {
-    return new StepBuilder("passo-inicial", jobRepository)
-        .<Importacao, Importacao>chunk(200, transationsManager)
-        .reader(reader)
-        .writer(writer)
-        .build();
-  }
+    @Bean
+    public Step passoInicial(JobRepository jobRepository, ItemReader<Importacao> reader,
+                             ItemWriter<Importacao> writer) {
+        return new StepBuilder("passo-inicial", jobRepository)
+                .<Importacao, Importacao>chunk(200, transationsManager)
+                .reader(reader)
+                .writer(writer)
+                .build();
+    }
 
-  @Bean
-  public ItemReader<Importacao> reader() {
-    return new FlatFileItemReaderBuilder<Importacao>()
-        .name("leitura-csv")
-        .resource(new FileSystemResource("files/dados.csv"))
-        .comments("--")
-        .delimited()
-        .names("cpf", "cliente", "nascimento", "evento", "data", "tipoIngresso", "horaImportacao")
-        .targetType(Importacao.class)
-        .build();
-  }
+    @Bean
+    public ItemReader<Importacao> reader() {
+        return new FlatFileItemReaderBuilder<Importacao>()
+                .name("leitura-csv")
+                .resource(new FileSystemResource("files/dados.csv"))
+                .comments("--")
+                .delimited()
+                .delimiter(";")
+                .names("cpf", "cliente", "nascimento", "evento", "data", "tipoIngresso", "horaImportacao")
+                .targetType(Importacao.class)
+                .build();
+    }
 
-  @Bean
-  public ItemWriter<Importacao> writer(DataSource dataSource) {
-    String sql = "INSERT INTO importacao(id, cliente, cpf, data, evento, hora_importacao, nascimento, tipo_igresso) +" +
-        "VALUES(:id, :cliente, :cpf, data:, :evento, " + LocalDate.now() + ", :nascimento, :tipoIgresso)";
-    return new JdbcBatchItemWriterBuilder<Importacao>()
-        .dataSource(dataSource)
-        .sql(sql)
-        .itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>())
-        .build();
-  }
+    @Bean
+    public ItemWriter<Importacao> writer(DataSource dataSource) {
+        String sql = "INSERT INTO importacao(id, cliente, cpf, data, evento, hora_importacao, nascimento, tipo_igresso) +" +
+                "VALUES(:id, :cliente, :cpf, data:, :evento, " + LocalDate.now() + ", :nascimento, :tipoIgresso)";
+        return new JdbcBatchItemWriterBuilder<Importacao>()
+                .dataSource(dataSource)
+                .sql(sql)
+                .itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>())
+                .build();
+    }
 }
